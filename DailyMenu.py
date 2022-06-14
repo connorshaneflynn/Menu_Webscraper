@@ -1,14 +1,26 @@
 from urllib.request import urlopen
 from urllib.error import HTTPError
 import re
+from datetime import datetime
 
 # !!! check if correct day
+
+def wochentag():
+    wochentage = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag"]
+    tag_num = datetime.today().weekday()
+
+    if tag_num >= 5:
+        print("Mensas are closed over the weekend. (I think so)")
+        raise AssertionError
+    
+    return wochentage[tag_num]
+
 
 def get_html(mensa_id):
     """
     returns html of menu for mensa with id mensa_id
     """
-    url = "https://www.mensa.uzh.ch/de/menueplaene/" + mensa_id
+    url = "https://www.mensa.uzh.ch/de/menueplaene/" + mensa_id + "/" + wochentag()
     
     try:
         page = urlopen(url)
