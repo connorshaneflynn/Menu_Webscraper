@@ -78,7 +78,7 @@ def menu_uzh(mensas):
         
         print("|||  ", mensa, "  |||\n")
         for i in range(len(menu_name)):
-            print("   " + menu_name[i] + ":\n\n        " + menu[i], "\n\n")
+            print("  ●  " + menu_name[i] + ":\n\n        " + menu[i], "\n\n")
     return
 
 
@@ -92,4 +92,7 @@ mensas = {
 
 
 if __name__ == "__main__":
+
     menu_uzh(mensas)
+
+    input("\n\n....................................................")
