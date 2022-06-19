@@ -1,8 +1,7 @@
 from urllib.request import urlopen, Request
-from urllib.error import HTTPError
-import re
+from re import findall, sub, DOTALL, match
 from datetime import date
-from rich import print as rprint
+
 
 
 def wochentag():
@@ -15,6 +14,7 @@ def wochentag():
 
     if tag_num >= 5:
         print("Mensas are closed over the weekend. (I think so)")
+        input("")
         raise AssertionError
     
     return wochentage[tag_num]
@@ -53,9 +53,9 @@ def get_menu_name_uzh(source):
     """
     
     pattern = "<h3>.*?<span>"
-    menu_name = re.findall(pattern, source)
+    menu_name = findall(pattern, source)
     for i in range(len(menu_name)):
-        menu_name[i] = re.sub("<.*?>", "", menu_name[i])
+        menu_name[i] = sub("<.*?>", "", menu_name[i])
     
     return menu_name
 
@@ -65,9 +65,9 @@ def get_menu_name_eth(source):
     """
     
     pattern = "<td> ?<strong>.*?</strong> ?</td>"
-    menu_name = re.findall(pattern, source)
+    menu_name = findall(pattern, source)
     for i in range(len(menu_name)):
-        menu_name[i] = re.sub("<.*?>", "", menu_name[i])
+        menu_name[i] = sub("<.*?>", "", menu_name[i])
         # optional: add sub for removing spaces before and after name in case source changes
     return menu_name
 
@@ -78,16 +78,16 @@ def get_menu_uzh(source):
     """
 
     pattern = "</span> </h3>.*?</p>"
-    menu = re.findall(pattern, source, re.DOTALL)
+    menu = findall(pattern, source, DOTALL)
 
     for i in range(len(menu)):
-        menu[i] = re.sub("Fleisch:.*?$", "", menu[i])
-        menu[i] = re.sub("<br>", ",", menu[i])
-        menu[i] = re.sub("<.*?>", "", menu[i])
-        menu[i] = re.sub("\n", "", menu[i])
-        menu[i] = re.sub(" ,", ",", menu[i])
-        menu[i] = re.sub("^ *", "", menu[i])
-        menu[i] = re.sub(", *$", "", menu[i])
+        menu[i] = sub("Fleisch:.*?$", "", menu[i])
+        menu[i] = sub("<br>", ",", menu[i])
+        menu[i] = sub("<.*?>", "", menu[i])
+        menu[i] = sub("\n", "", menu[i])
+        menu[i] = sub(" ,", ",", menu[i])
+        menu[i] = sub("^ *", "", menu[i])
+        menu[i] = sub(", *$", "", menu[i])
 
     return menu
 
@@ -97,21 +97,22 @@ def get_menu_eth(source):
     """
     #(?!.*\b(?:ABEND)\b)
     pattern = "<td><strong>.*?<div class=\"allergene\">"
-    menu = re.findall(pattern, source)
+    menu = findall(pattern, source)
     
     for i in range(len(menu)):
         # filter
         #menu[i] = re.sub("<br>", ",", menu[i])
-        menu[i] = re.sub("<.*?>", " ", menu[i])
+        menu[i] = sub("<.*?>", " ", menu[i])
         #menu[i] = re.sub("\n", "", menu[i])
-        menu[i] = re.sub("  ", " ", menu[i])
-        menu[i] = re.sub("Add on.*?$", "", menu[i]) # remove add ons, optional
-        menu[i] = re.sub("^ *", "", menu[i])
-        menu[i] = re.sub(" *$", "", menu[i])
+        menu[i] = sub("  ", " ", menu[i])
+        menu[i] = sub("Add on.*?$", "", menu[i]) # remove add ons, optional
+        menu[i] = sub("^ *", "", menu[i])
+        menu[i] = sub(" *$", "", menu[i])
 
     return menu
 
 
+# backup:
 def DailyMenu(mensas):
     """
     Prints menues of all mensas in "mensas"
@@ -135,47 +136,12 @@ def DailyMenu(mensas):
         print("|||  ", mensa, "  |||\n")
         for i in range(len(menu)):
             # remove evening menues, optional
-            if re.match(".*?ABEND",menu_name[i]):
+            if match(".*?ABEND",menu_name[i]):
                 continue
 
             print("  ●  " + menu_name[i] + ":\n\n        " + menu[i], "\n\n")
 
     return
-
-
-def DailyMenu_dict(mensas):
-    """
-    Returns menues of all mensas in "mensas" in a dictionary
-    """
-    menu = {}
-
-    for mensa, id in mensas.items():
-        html_current = get_html(id)
-
-        # ETH or UZH
-        if type(id) == str:
-            menu_name_current = get_menu_name_uzh(html_current)
-            menu_current = get_menu_uzh(html_current)
-
-        elif type(id) == int:
-            menu_name_current = get_menu_name_eth(html_current)
-            menu_current = get_menu_eth(html_current)
-
-        else:
-            raise NameError
-
-        
-        
-        menu_mensa = {}
-        for i in range(len(menu_name_current)):
-            # remove evening menues, optional
-            if re.match(".*?ABEND",menu_name_current[i]):
-                continue
-            
-            menu_mensa[menu_name_current[i]] = menu_current[i]
-        menu[mensa] = menu_mensa
-
-    return menu
 
 
 # specify mensas to get menues from
@@ -193,6 +159,5 @@ mensas = {
 if __name__ == "__main__":
 
     DailyMenu(mensas)
-    #rprint(DailyMenu_dict(mensas))
 
     input("\n\n....................................................")
